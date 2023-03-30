@@ -12,11 +12,11 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 
+import java.text.DecimalFormat;
+import java.util.Map;
 import java.util.Objects;
 
 public class StopWatchItem extends Item {
-    public static boolean hasUpgrades = false;
-    public static double stuffPerSecond = 0;
 
     public StopWatchItem(Properties properties) {
         super(properties);
@@ -24,6 +24,8 @@ public class StopWatchItem extends Item {
 
     @Override
     public InteractionResult useOn(UseOnContext context) {
+        double stuffPerSecond = 0;
+        boolean hasUpgrades;
         if (context.getLevel().isClientSide() || context.getHand() != InteractionHand.MAIN_HAND) {
             return super.useOn(context);
         }
@@ -41,6 +43,7 @@ public class StopWatchItem extends Item {
         if (id.equals("")) {
             return super.useOn(context);
         }
+
         if (id.startsWith("minecraft:")) {
             switch (id) {
                 case "minecraft:furnace" -> stuffPerSecond = 0.1;
@@ -54,6 +57,16 @@ public class StopWatchItem extends Item {
             for (String machineID: MekanismBlocks.tenSecondTimes) {
                 if (id.endsWith(machineID)) {
                     stuffPerSecond = 0.1;
+                    for (Map.Entry<String, Integer> entry : MekanismBlocks.machineTiers.entrySet()) {
+                        String key = entry.getKey();
+//                        Msg(key, player);
+                        if (id.replace("mekanism:", "").startsWith(key)) {
+//                            Msg(String.valueOf(stuffPerSecond), player);
+                            stuffPerSecond *= entry.getValue();
+//                            Msg(String.valueOf(stuffPerSecond), player);
+                            break;
+                        }
+                    }
                     break;
                 }
             }
@@ -85,18 +98,23 @@ public class StopWatchItem extends Item {
 //                    Msg(String.valueOf(type), player);
 //                    Msg(String.valueOf(amount), player);
                     if (type == 0) {
-                        Msg("Aaaaa" + MekanismBlocks.speedUpgrades[amount], player);
-                        stuffPerSecond = stuffPerSecond * MekanismBlocks.speedUpgrades[amount];
+                        stuffPerSecond *= MekanismBlocks.speedUpgrades[amount];
                     }
                 }
             }
 
         }
-        Msg("This block processes at " + stuffPerSecond + " things/s", player);
+        if (stuffPerSecond == 0) {
+            Msg("Unsupported Machine!", player);
+        } else {
+            Msg("This block processes at " + new DecimalFormat("#.###").format(stuffPerSecond) + " things/s", player);
+        }
         return super.useOn(context);
     }
 
     private void Msg(String message, Player player) {
-        player.sendSystemMessage(Component.nullToEmpty(message));
+
+        player.displayClientMessage(Component.nullToEmpty(message), true);
+
     }
 }

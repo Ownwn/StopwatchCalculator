@@ -1,6 +1,7 @@
 package com.ownwn.stopwatchcalculator;
 
 import com.mojang.logging.LogUtils;
+import com.ownwn.stopwatchcalculator.block.MekanismBlocks;
 import com.ownwn.stopwatchcalculator.item.StopWatchItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -51,7 +52,9 @@ public class StopwatchCalculator
         MinecraftForge.EVENT_BUS.register(this);
     }
 
-    private void commonSetup(final FMLCommonSetupEvent event) {}
+    private void commonSetup(final FMLCommonSetupEvent event) {
+        MekanismBlocks.populateMap(MekanismBlocks.machineTiers);
+    }
 
 
     // You can use SubscribeEvent and let the Event Bus discover methods to call
