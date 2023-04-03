@@ -53,7 +53,8 @@ public class StopwatchCalculator
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
-        MekanismBlocks.populateMap(MekanismBlocks.machineTiers);
+        MekanismBlocks.populateMachineTiers(MekanismBlocks.MACHINE_TIERS);
+        MekanismBlocks.populateMilibucketMachines(MekanismBlocks.MILLIBUCKET_MACHINES);
     }
 
 

@@ -54,10 +54,12 @@ public class StopWatchItem extends Item {
 
 
         } else if (id.startsWith("mekanism")) {
-            for (String machineID: MekanismBlocks.tenSecondTimes) {
+            boolean foundMachineType = false;
+            for (String machineID: MekanismBlocks.TEN_SECOND_MACHINES) {
                 if (id.endsWith(machineID)) {
+                    foundMachineType = true;
                     stuffPerSecond = 0.1;
-                    for (Map.Entry<String, Integer> entry : MekanismBlocks.machineTiers.entrySet()) {
+                    for (Map.Entry<String, Integer> entry : MekanismBlocks.MACHINE_TIERS.entrySet()) {
                         String key = entry.getKey();
 //                        Msg(key, player);
                         if (id.replace("mekanism:", "").startsWith(key)) {
@@ -68,6 +70,15 @@ public class StopWatchItem extends Item {
                         }
                     }
                     break;
+                }
+            }
+            if (!foundMachineType) {
+                for (Map.Entry<String, Double> entry : MekanismBlocks.MILLIBUCKET_MACHINES.entrySet()) {
+                    if (id.endsWith(entry.getKey())) {
+                        foundMachineType = true;
+                        stuffPerSecond = entry.getValue();
+                        break;
+                    }
                 }
             }
 
@@ -98,7 +109,17 @@ public class StopWatchItem extends Item {
 //                    Msg(String.valueOf(type), player);
 //                    Msg(String.valueOf(amount), player);
                     if (type == 0) {
-                        stuffPerSecond *= MekanismBlocks.speedUpgrades[amount];
+                        boolean isStrong = false;
+                        for (String machineID: MekanismBlocks.STRONG_UPGRADE_MACHINES) {
+                            if (id.endsWith(machineID)) {
+                                stuffPerSecond *= MekanismBlocks.FAST_SPEED_UPGRADES[amount];
+                                isStrong = true;
+                                break;
+                            }
+                        }
+                        if (!isStrong) {
+                            stuffPerSecond *= MekanismBlocks.SLOW_SPEED_UPGRADES[amount];
+                        }
                     }
                 }
             }
