@@ -50,11 +50,13 @@ public class StopwatchCalculator
 
         // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);
+        MinecraftForge.EVENT_BUS.register(new Test());
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
-        MekanismBlocks.populateMachineTiers(MekanismBlocks.MACHINE_TIERS);
-        MekanismBlocks.populateMilibucketMachines(MekanismBlocks.MILLIBUCKET_MACHINES);
+        MekanismBlocks.populateMachineTiers(MekanismBlocks.MEKANISM_MACHINE_TIERS);
+        MekanismBlocks.populateMilibucketMachines(MekanismBlocks.MEKANISM_MILLIBUCKET_MACHINES);
+        MekanismBlocks.populateItemMachines(MekanismBlocks.MEKANISM_ITEM_MACHINES);
     }
 
 

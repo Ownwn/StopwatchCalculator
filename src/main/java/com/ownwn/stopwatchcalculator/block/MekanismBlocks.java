@@ -4,14 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MekanismBlocks {
-    public static final String[] TEN_SECOND_MACHINES = { // machines that take 10 seconds to produce one item
-            "infusing_factory",
-            "metallurgic_infuser",
-            "crusher",
-            "crushing_factory",
-            "enrichment_chamber",
-            "enriching_factory"
-    };
 
     public static final String[] STRONG_UPGRADE_MACHINES = { // machines that are strongly affected by speed upgrade
             "chemical_washer",
@@ -19,8 +11,9 @@ public class MekanismBlocks {
             "electrolytic_seperator"
     };
 
-    public static final Map<String, Integer> MACHINE_TIERS = new HashMap<>(); // number of slots in a machine
-    public static final Map<String, Double> MILLIBUCKET_MACHINES = new HashMap<>();
+    public static final Map<String, Integer> MEKANISM_MACHINE_TIERS = new HashMap<>(); // number of slots in a machine
+    public static final Map<String, Double> MEKANISM_MILLIBUCKET_MACHINES = new HashMap<>();
+    public static final Map<String, Double> MEKANISM_ITEM_MACHINES = new HashMap<>();
 
 
     public static final double[] SLOW_SPEED_UPGRADES = { // items per 10 seconds
@@ -55,7 +48,7 @@ public class MekanismBlocks {
     }
 
     public static void populateMilibucketMachines(Map<String, Double> map) {
-        map.put("pressurized_reaction_chamber", 0.2);
+
 
 
 
@@ -68,4 +61,43 @@ public class MekanismBlocks {
 
 
     }
+
+    public static void populateItemMachines(Map<String, Double> map) {
+        map.put("metallurgic_infuser", 0.1);
+        map.put("infusing_factory", 0.1);
+
+        map.put("crusher", 0.1);
+        map.put("crushing_factory", 0.1);
+
+        map.put("enrichment_chamber", 0.1);
+        map.put("enriching_factory", 0.1);
+
+        map.put("energized_smelter", 0.1);
+        map.put("smelting_factory", 0.1);
+
+        map.put("purification_chamber", 0.1);
+        map.put("purifying_factory", 0.1);
+
+        map.put("chemical_injection_chamber", 0.1);
+        map.put("injecting_factory", 0.1);
+
+        map.put("combiner", 0.1);
+        map.put("combining_factory", 0.1);
+
+        map.put("osmium_compressor", 0.1);
+        map.put("compressing_factory", 0.1);
+
+
+        map.put("chemical_crystallizer", 0.1);
+
+
+        map.put("pressurized_reaction_chamber", 0.2);
+        map.put("chemical_oxidizer", 0.2);
+
+
+
+
+
+    }
+
 }

@@ -1,5 +1,6 @@
 package com.ownwn.stopwatchcalculator.item;
 
+import com.ownwn.stopwatchcalculator.Test;
 import com.ownwn.stopwatchcalculator.block.MekanismBlocks;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -55,16 +56,16 @@ public class StopWatchItem extends Item {
 
         } else if (id.startsWith("mekanism")) {
             boolean foundMachineType = false;
-            for (String machineID: MekanismBlocks.TEN_SECOND_MACHINES) {
-                if (id.endsWith(machineID)) {
+            for (Map.Entry<String, Double> machineID : MekanismBlocks.MEKANISM_ITEM_MACHINES.entrySet()) {
+                if (id.endsWith(machineID.getKey())) {
                     foundMachineType = true;
-                    stuffPerSecond = 0.1;
-                    for (Map.Entry<String, Integer> entry : MekanismBlocks.MACHINE_TIERS.entrySet()) {
-                        String key = entry.getKey();
+                    stuffPerSecond = machineID.getValue();
+                    for (Map.Entry<String, Integer> machineTier : MekanismBlocks.MEKANISM_MACHINE_TIERS.entrySet()) {
+                        String key = machineTier.getKey();
 //                        Msg(key, player);
                         if (id.replace("mekanism:", "").startsWith(key)) {
 //                            Msg(String.valueOf(stuffPerSecond), player);
-                            stuffPerSecond *= entry.getValue();
+                            stuffPerSecond *= machineTier.getValue();
 //                            Msg(String.valueOf(stuffPerSecond), player);
                             break;
                         }
@@ -73,7 +74,7 @@ public class StopWatchItem extends Item {
                 }
             }
             if (!foundMachineType) {
-                for (Map.Entry<String, Double> entry : MekanismBlocks.MILLIBUCKET_MACHINES.entrySet()) {
+                for (Map.Entry<String, Double> entry : MekanismBlocks.MEKANISM_MILLIBUCKET_MACHINES.entrySet()) {
                     if (id.endsWith(entry.getKey())) {
                         foundMachineType = true;
                         stuffPerSecond = entry.getValue();
@@ -130,6 +131,7 @@ public class StopWatchItem extends Item {
         } else {
             Msg("This block processes at " + new DecimalFormat("#.###").format(stuffPerSecond) + " things/s", player);
         }
+        Test.displayTime = System.currentTimeMillis() + 1000;
         return super.useOn(context);
     }
 
