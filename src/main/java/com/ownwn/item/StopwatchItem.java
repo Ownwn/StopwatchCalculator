@@ -1,15 +1,19 @@
 package com.ownwn.item;
 
+import com.ownwn.features.ConfigOption;
+import com.ownwn.features.MekanismBlocks;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.world.World;
 
 import java.text.DecimalFormat;
+import java.util.Map;
 import java.util.Objects;
 
 public class StopwatchItem extends Item {
@@ -41,6 +45,7 @@ public class StopwatchItem extends Item {
         }
 
         NbtCompound contents = Objects.requireNonNull(world.getBlockEntity(context.getBlockPos())).createNbtWithId();
+        System.out.println(contents);
         // get nbt data, including the mod ID
         String id = contents.getString("id");
         if (id.equals("")) { // should never happen but check just in case
@@ -52,6 +57,92 @@ public class StopwatchItem extends Item {
                 case "minecraft:furnace" -> stuffPerSecond = 0.1;
                 case "minecraft:blast_furnace" -> stuffPerSecond = 0.2; // blast furnace is 2x speed
             }
+
+            System.out.println(id);
+        } else if (id.startsWith("mekanism")) {
+
+            boolean foundMachineType = false;
+            for (Map.Entry<String, Double> machineID : MekanismBlocks.MEKANISM_ITEM_MACHINES.entrySet()) {
+                System.out.println(machineID.getKey());
+                System.out.println(machineID.getValue());
+                if (id.endsWith(machineID.getKey())) {
+                    foundMachineType = true;
+                    stuffPerSecond = machineID.getValue();
+                    for (Map.Entry<String, Integer> machineTier : MekanismBlocks.MEKANISM_MACHINE_TIERS.entrySet()) {
+                        String key = machineTier.getKey();
+//                        Msg(key, player);
+                        if (id.replace("mekanism:", "").startsWith(key)) {
+//                            Msg(String.valueOf(stuffPerSecond), player);
+                            stuffPerSecond *= machineTier.getValue();
+//                            Msg(String.valueOf(stuffPerSecond), player);
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+            if (!foundMachineType) {
+                for (Map.Entry<String, Double> entry : MekanismBlocks.MEKANISM_MILLIBUCKET_MACHINES.entrySet()) {
+                    if (id.endsWith(entry.getKey())) {
+                        foundMachineType = true;
+                        stuffPerSecond = entry.getValue();
+                        break;
+                    }
+                }
+            }
+
+            NbtCompound upgradeTag = contents.getCompound("componentUpgrade").getCompound("upgrades");
+//            Msg(String.valueOf(upgradeTag), player);
+//
+//            Msg(String.valueOf(contents.getCompound("componentUpgrade").get("upgrades")), player);
+//            Msg(String.valueOf(upgradeTag), player);
+//            Msg(String.valueOf(contents.getCompound("componentUpgrade")), player);
+            hasUpgrades = !upgradeTag.toString().equals("");
+//            Msg(String.valueOf(hasUpgrades), player);
+
+            /* 0: speed
+             *  1: energy
+             *  2: filter
+             *  3: gas
+             *  4: muffling
+             *  5: anchor
+             *  6: stone generator
+             * */
+
+            if (hasUpgrades) {
+                NbtList upgradesListTag = contents.getCompound("componentUpgrade").getList("upgrades", 10); // 10 indicates a list of CompoundTag elements
+                for (int i = 0; i < upgradesListTag.size(); i++) {
+                    NbtCompound upgradeTypeAmountTag = upgradesListTag.getCompound(i);
+                    int type = upgradeTypeAmountTag.getInt("type");
+                    int amount = upgradeTypeAmountTag.getInt("amount");
+//                    Msg(String.valueOf(type), player);
+//                    Msg(String.valueOf(amount), player);
+                    if (type == 0) {
+                        boolean isStrong = false;
+                        for (String machineID: MekanismBlocks.STRONG_UPGRADE_MACHINES) {
+                            if (id.endsWith(machineID)) {
+                                stuffPerSecond *= MekanismBlocks.FAST_SPEED_UPGRADES[amount];
+                                isStrong = true;
+                                break;
+                            }
+                        }
+                        if (!isStrong) {
+                            stuffPerSecond *= MekanismBlocks.SLOW_SPEED_UPGRADES[amount];
+                        }
+                    }
+                }
+            }
+
+        } else if (id.startsWith("ad_astra:")) { // burn time: 200 per 10 seconds == 1 per tick
+            String name = id.replace("ad_astra:", "");
+            double timeLeft = switch (name) {
+                case "coal_generator" -> contents.getInt("CookTimeTotal") - contents.getInt(("CookTime"));
+                default -> 0;
+            };
+            if (timeLeft != 0) {
+                stuffPerSecond = 1.0 / (timeLeft / 20);
+            }
+
         }
 
         if (stuffPerSecond == 0) { // block entity was not detected
@@ -66,10 +157,15 @@ public class StopwatchItem extends Item {
     }
 
     public static void sendSuccess(double machineSpeed, ItemUsageContext context) {
-        context.getPlayer().sendMessage(Text.literal("\u00a76This block processes at \u00a7b" + new DecimalFormat("#.###").format(machineSpeed) + " \u00a76things/s"), true);
+        if (ConfigOption.shortMessages.getValue()) {
+            context.getPlayer().sendMessage(Text.literal("\u00a76Speed: \u00a7b" + new DecimalFormat("#.###").format(machineSpeed) + "\u00a76/s"), ConfigOption.actionBarDisplay.getValue());
+            return;
+        }
+        context.getPlayer().sendMessage(Text.literal("\u00a76This block processes at \u00a7b" + new DecimalFormat("#.###").format(machineSpeed) + " \u00a76things/s"), ConfigOption.actionBarDisplay.getValue());
+
     } // \u00a7 is a section sign, a partially deprecated way to colour text
     public static void sendFail(ItemUsageContext context) {
-        context.getPlayer().sendMessage(Text.literal("\u00a7cUnsupported Machine!"), true);
+        context.getPlayer().sendMessage(Text.literal("\u00a7cUnsupported Machine!"), ConfigOption.actionBarDisplay.getValue());
     }
 
 
