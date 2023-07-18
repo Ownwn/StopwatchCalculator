@@ -135,12 +135,14 @@ public class StopwatchItem extends Item {
 
         } else if (id.startsWith("ad_astra:")) { // burn time: 200 per 10 seconds == 1 per tick
             String name = id.replace("ad_astra:", "");
-            double timeLeft = switch (name) {
-                case "coal_generator" -> contents.getInt("CookTimeTotal") - contents.getInt(("CookTime"));
-                default -> 0;
-            };
-            if (timeLeft != 0) {
-                stuffPerSecond = 1.0 / (timeLeft / 20);
+
+            if (name.equals("coal_generator")) {
+                stuffPerSecond = 1.0 / ((contents.getInt("CookTimeTotal") - contents.getInt(("CookTime"))) / 20.0);
+            } else {
+                stuffPerSecond = switch (name) {
+                    case "oxygen_loader" -> 400;
+                    default -> 0;
+                };
             }
 
         }

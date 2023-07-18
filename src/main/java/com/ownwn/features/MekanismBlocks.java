@@ -100,11 +100,5 @@ public class MekanismBlocks {
 
         map.put("pressurized_reaction_chamber", 0.2);
 
-
-
-
-
-
     }
-
 }
