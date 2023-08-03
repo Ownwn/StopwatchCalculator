@@ -1,7 +1,8 @@
 package com.ownwn.item;
 
-import com.ownwn.features.ConfigOption;
+import com.ownwn.features.AdAstraBlocks;
 import com.ownwn.features.MekanismBlocks;
+import com.ownwn.features.config.ConfigOption;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemUsageContext;
@@ -135,20 +136,38 @@ public class StopwatchItem extends Item {
 
         } else if (id.startsWith("ad_astra:")) { // burn time: 200 per 10 seconds == 1 per tick
             String name = id.replace("ad_astra:", "");
-
-            if (name.equals("coal_generator")) {
-                stuffPerSecond = 1.0 / ((contents.getInt("CookTimeTotal") - contents.getInt(("CookTime"))) / 20.0);
-            } else {
-                stuffPerSecond = switch (name) {
-                    case "oxygen_loader" -> 400;
-                    default -> 0;
-                };
+            if (ConfigOption.debugMode.getValue()) {
+                System.out.println("Machine Name: " + name);
             }
-
+            if (name.equals("coal_generator")) {
+                if (ConfigOption.debugMode.getValue()) {
+                    System.out.println("NBT Contents: " + contents);
+                }
+                double cookTimeSeconds = contents.getInt("CookTimeTotal") / 20.0;
+                if (cookTimeSeconds == 0) {
+                    sendFail(context, false);
+                    return ActionResult.PASS;
+                }
+                stuffPerSecond = 1.0 / (cookTimeSeconds);
+            } else {
+                for (Map.Entry<String, Double> machineSet : AdAstraBlocks.AD_ASTRA_MACHINES.entrySet()) {
+                    if (name.equals(machineSet.getKey())) {
+                        stuffPerSecond = machineSet.getValue();
+                        break;
+                    }
+                }
+//                stuffPerSecond = switch (name) {
+//                    case "oxygen_loader" -> 400;
+//                    default -> 0;
+//                };
+            }
+            if (ConfigOption.debugMode.getValue()) {
+                System.out.println("Stuff Per Second: " + stuffPerSecond);
+            }
         }
 
         if (stuffPerSecond == 0) { // block entity was not detected
-            sendFail(context);
+            sendFail(context, true);
             return ActionResult.PASS;
         }
 
@@ -166,8 +185,14 @@ public class StopwatchItem extends Item {
         context.getPlayer().sendMessage(Text.literal("\u00a76This block processes at \u00a7b" + new DecimalFormat("#.###").format(machineSpeed) + " \u00a76things/s"), ConfigOption.actionBarDisplay.getValue());
 
     } // \u00a7 is a section sign, a partially deprecated way to colour text
-    public static void sendFail(ItemUsageContext context) {
-        context.getPlayer().sendMessage(Text.literal("\u00a7cUnsupported Machine!"), ConfigOption.actionBarDisplay.getValue());
+    public static void sendFail(ItemUsageContext context, boolean unsupported) { // unsupported = false if an error occured
+        String failText;
+        if (unsupported) {
+            failText = "\u00a7cUnsupported Machine!";
+        } else {
+            failText = "\u00a7cAn error occured!";
+        }
+        context.getPlayer().sendMessage(Text.literal(failText), ConfigOption.actionBarDisplay.getValue());
     }
 
 

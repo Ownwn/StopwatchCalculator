@@ -1,7 +1,8 @@
 package com.ownwn;
 
-import com.ownwn.features.ConfigOption;
-import com.ownwn.features.ToggleCommand;
+import com.ownwn.features.AdAstraBlocks;
+import com.ownwn.features.config.ConfigOption;
+import com.ownwn.features.config.ConfigCommand;
 import com.ownwn.item.StopwatchItem;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
@@ -35,7 +36,7 @@ public class StopwatchCalculator implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        ClientCommandRegistrationCallback.EVENT.register((dispatcher, access) -> ToggleCommand.register(dispatcher) );
+        ClientCommandRegistrationCallback.EVENT.register((dispatcher, access) -> ConfigCommand.register(dispatcher) );
         // This code runs as soon as Minecraft is in a mod-load-ready state.
         // However, some things (like resources) may still be uninitialized.
         // Proceed with mild caution.
@@ -46,18 +47,18 @@ public class StopwatchCalculator implements ModInitializer {
 
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.FUNCTIONAL).register(entries -> entries.add(STOPWATCH));
         Registry.register(Registries.ITEM, new Identifier(MODID, "stopwatch"), STOPWATCH);
-
+        AdAstraBlocks.populateAstraMachines(); // add the ad astra machines to be used for stopwatch
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (configKey.wasPressed()) {
                 ConfigOption.openConfig();
             }
 
-            if (System.currentTimeMillis() - ToggleCommand.timeDelay > 50) {
+            if (System.currentTimeMillis() - ConfigCommand.timeDelay > 50) {
                 // add a delay of 50ms before opening the gui to stop it instantly closing when the chat handler tries to close the chat window
                 return;
             }
             ConfigOption.openConfig();
-            ToggleCommand.timeDelay = 0;
+            ConfigCommand.timeDelay = 0;
         });
 
 

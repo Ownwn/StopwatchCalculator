@@ -1,4 +1,4 @@
-package com.ownwn.features;
+package com.ownwn.features.config;
 
 import com.ownwn.StopwatchCalculator;
 import net.minecraft.client.MinecraftClient;
@@ -41,6 +41,7 @@ public class ConfigOption {
 
     public static final ConfigOption actionBarDisplay = ConfigOption.addOption("Display in Actionbar", true);
     public static final ConfigOption shortMessages = ConfigOption.addOption("Shortened Message");
+    public static final ConfigOption debugMode = ConfigOption.addOption("Debug Mode");
 
     public static void registerConfig() { // run this to ensure the config options are registefed
         StopwatchCalculator.LOGGER.info("Registering config...");
