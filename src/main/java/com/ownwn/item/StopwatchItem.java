@@ -178,21 +178,22 @@ public class StopwatchItem extends Item {
     }
 
     public static void sendSuccess(double machineSpeed, ItemUsageContext context) {
-        if (ConfigOption.shortMessages.getValue()) {
-            context.getPlayer().sendMessage(Text.literal("\u00a76Speed: \u00a7b" + new DecimalFormat("#.###").format(machineSpeed) + "\u00a76/s"), ConfigOption.actionBarDisplay.getValue());
+        if (ConfigOption.actionBarDisplay.getValue()) {
+            DrawHelper.drawSuccess(machineSpeed);
             return;
         }
-        context.getPlayer().sendMessage(Text.literal("\u00a76This block processes at \u00a7b" + new DecimalFormat("#.###").format(machineSpeed) + " \u00a76things/s"), ConfigOption.actionBarDisplay.getValue());
+        String text = ConfigOption.shortMessages.getValue() ? "\u00a76Speed: \u00a7b" + new DecimalFormat("#.###").format(machineSpeed) + "\u00a76/s" : "\u00a76This block processes at \u00a7b" + new DecimalFormat("#.###").format(machineSpeed) + " \u00a76things/s";
+        context.getPlayer().sendMessage(Text.literal(text));
 
-    } // \u00a7 is a section sign, a partially deprecated way to colour text
+    } // \u00a7 is a section sign, an easier but partially deprecated way to colour text
     public static void sendFail(ItemUsageContext context, boolean unsupported) { // unsupported = false if an error occured
-        String failText;
-        if (unsupported) {
-            failText = "\u00a7cUnsupported Machine!";
-        } else {
-            failText = "\u00a7cAn error occured!";
+        if (ConfigOption.actionBarDisplay.getValue()) {
+            DrawHelper.drawFail(unsupported);
+            return;
         }
-        context.getPlayer().sendMessage(Text.literal(failText), ConfigOption.actionBarDisplay.getValue());
+        String text = unsupported ? "\u00a7cUnsupported Machine!" : "\u00a7cAn error occured!";
+        context.getPlayer().sendMessage(Text.literal(text));
+
     }
 
 
