@@ -7,7 +7,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import java.text.DecimalFormat;
 
 public class DrawHelper {
-    public static long drawTime = 0;
+    public static long drawTime = 0; // used to draw for a specified period of time
     public static String message = "";
     public static void doDraw(MatrixStack matrices) {
         if (MinecraftClient.getInstance().player == null) {
@@ -29,12 +29,15 @@ public class DrawHelper {
 
 
         MinecraftClient.getInstance().textRenderer.drawWithShadow(matrices, message, x * 0.625f, y * 0.625f, 16777215);
+        // offset x and y values to ensure it's drawn in the right place
+
         matrices.scale(downScale, downScale, downScale); // scale back up to continue drawing
     }
 
     public static void drawSuccess(double machineSpeed) {
         message = ConfigOption.shortMessages.getValue() ? "\u00a76Speed: \u00a7b" + new DecimalFormat("#.###").format(machineSpeed) + "\u00a76/s" : "\u00a76This block processes at \u00a7b" + new DecimalFormat("#.###").format(machineSpeed) + " \u00a76things/s";
         drawTime = System.currentTimeMillis() + 2000;
+        //u00a7 followed by a character is used to colour text.
     }
 
     public static void drawFail(boolean unsupported) {

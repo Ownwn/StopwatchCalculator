@@ -9,7 +9,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 public class ConfigScreen extends Screen {
-    private final Screen parent;
+    private final Screen parent; // previous screen
 
     public ConfigScreen(Screen parent) {
         super(Text.literal("StopwatchCalculator Config").setStyle(Style.EMPTY.withColor(Formatting.AQUA)));
@@ -19,17 +19,12 @@ public class ConfigScreen extends Screen {
     @Override
     protected void init() {
 
-//        int buttonWidth = 100;
-//        int buttonHeight = 20;
-//        int x = (this.width - buttonWidth) / 2;
-//        int y = (this.height - buttonHeight) / 2;
-
         int buttonWidth = 140;
         int buttonHeight = 20;
         int buttonGap = 5;
         int totalButtonHeight = (buttonHeight + buttonGap) * 12 - buttonGap; // Total height of all buttons including gaps
         int startX = (this.width - buttonWidth) / 2; // X-coordinate for the buttons
-        int startY = 20 +((this.height - totalButtonHeight) / 2); // Y-coordinate for the buttons
+        int startY = 120 +((this.height - totalButtonHeight) / 2); // Y-coordinate for the buttons
 
         int i = 0;
         for (ConfigOption option : ConfigOption.configList) {
@@ -54,8 +49,8 @@ public class ConfigScreen extends Screen {
 
     @Override
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-        renderBackground(matrices);
-        drawCenteredTextWithShadow(matrices, textRenderer, title, width / 2, 30, 0xFFFFFF);
+        renderBackground(matrices); // render default background
+        drawCenteredTextWithShadow(matrices, textRenderer, title, width / 2, 30, 0xFFFFFF); // draw GUI title text
         super.render(matrices, mouseX, mouseY, delta);
     }
 

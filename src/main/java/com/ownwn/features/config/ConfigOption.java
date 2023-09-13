@@ -28,6 +28,7 @@ public class ConfigOption {
         this.value = value;
     }
 
+    // add a boolean option with a name and default value
     public static ConfigOption addOption(String key, boolean defaultValue) {
         ConfigOption option = new ConfigOption(key, defaultValue);
         configList.add(option);
@@ -39,15 +40,18 @@ public class ConfigOption {
         return option;
     }
 
+
+    // display in actionbar instead of the players chat box
     public static final ConfigOption actionBarDisplay = ConfigOption.addOption("Display in Actionbar", true);
-    public static final ConfigOption shortMessages = ConfigOption.addOption("Shortened Message");
-    public static final ConfigOption debugMode = ConfigOption.addOption("Debug Mode");
+    public static final ConfigOption shortMessages = ConfigOption.addOption("Shortened Message"); // shorten messages from the mod
+    public static final ConfigOption debugMode = ConfigOption.addOption("Debug Mode"); // used for development purposes
 
     public static void registerConfig() { // run this to ensure the config options are registefed
         StopwatchCalculator.LOGGER.info("Registering config...");
-    }
+    } // this gets run to ensure the ConfigOptions are properly initialised
 
     public static void openConfig() {
         MinecraftClient.getInstance().setScreen(new ConfigScreen(null));
     }
+    // set the parent screen to null so that when the config is closed, it exits to the game not the chat window.
 }

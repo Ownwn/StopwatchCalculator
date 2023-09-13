@@ -21,26 +21,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class StopwatchCalculator implements ModInitializer {
-    // This logger is used to write text to the console and the log file.
-    // It is considered best practice to use your mod id as the logger's name.
-    // That way, it's clear which mod wrote info, warnings, and errors.
     public static final Logger LOGGER = LoggerFactory.getLogger("stopwatchcalculator");
     public static final String MODID = "stopwatchcalculator";
 
     private static final KeyBinding configKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-            "Open Config",
+            "Open Config", // name
             InputUtil.Type.KEYSYM,
-            GLFW.GLFW_KEY_B,
-            "Stopwatch Calculator"
+            GLFW.GLFW_KEY_B, // "B" key
+            "Stopwatch Calculator" // category
     ));
 
     @Override
     public void onInitialize() {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, access) -> ConfigCommand.register(dispatcher) );
-        // This code runs as soon as Minecraft is in a mod-load-ready state.
-        // However, some things (like resources) may still be uninitialized.
-        // Proceed with mild caution.
-
 
         Item STOPWATCH = new StopwatchItem(new Item.Settings().maxCount(1));
         ConfigOption.registerConfig();

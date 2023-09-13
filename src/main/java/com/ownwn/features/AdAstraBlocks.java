@@ -6,6 +6,7 @@ import java.util.Map;
 public class AdAstraBlocks {
 
     public static final Map<String, Double> AD_ASTRA_MACHINES = new HashMap<>();
+    // list of machines that can be iterated over.
 
 
     public static void populateAstraMachines() { // list of machines and their respective speeds

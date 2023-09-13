@@ -19,13 +19,15 @@ import java.util.Objects;
 
 public class StopwatchItem extends Item {
 
+    public static final int COMPOUND_LIST_KEY = 10;  // 10 indicates a list of CompoundTag elements
+
     public StopwatchItem(Settings settings) {
         super(settings);
     }
 
     @Override
     public ActionResult useOnBlock(ItemUsageContext context) {
-        double stuffPerSecond = 0;
+        double processingSpeed = 0;
         boolean hasUpgrades;
         if (context.getWorld().isClient || context.getHand() != Hand.MAIN_HAND) {
             // cancel client-side context to prevent duplicate calls
@@ -39,6 +41,7 @@ public class StopwatchItem extends Item {
         }
 
 
+
         PlayerEntity player = context.getPlayer();
         if (player == null) {
             // player is null can have nasty consequences
@@ -46,7 +49,10 @@ public class StopwatchItem extends Item {
         }
 
         NbtCompound contents = Objects.requireNonNull(world.getBlockEntity(context.getBlockPos())).createNbtWithId();
-        System.out.println(contents);
+        if (ConfigOption.debugMode.getValue()) {
+            System.out.println(contents);
+        }
+
         // get nbt data, including the mod ID
         String id = contents.getString("id");
         if (id.equals("")) { // should never happen but check just in case
@@ -55,27 +61,31 @@ public class StopwatchItem extends Item {
 
         if (id.startsWith("minecraft:")) {
             switch (id) {
-                case "minecraft:furnace" -> stuffPerSecond = 0.1;
-                case "minecraft:blast_furnace" -> stuffPerSecond = 0.2; // blast furnace is 2x speed
+                case "minecraft:furnace" -> processingSpeed = 0.1;
+                case "minecraft:blast_furnace" -> processingSpeed = 0.2; // blast furnace is 2x speed
+            }
+            if (ConfigOption.debugMode.getValue()) {
+                System.out.println(id);
             }
 
-            System.out.println(id);
         } else if (id.startsWith("mekanism")) {
 
             boolean foundMachineType = false;
             for (Map.Entry<String, Double> machineID : MekanismBlocks.MEKANISM_ITEM_MACHINES.entrySet()) {
-                System.out.println(machineID.getKey());
-                System.out.println(machineID.getValue());
+
+                if (ConfigOption.debugMode.getValue()) {
+                    System.out.println(machineID.getKey());
+                    System.out.println(machineID.getValue());
+                }
+
                 if (id.endsWith(machineID.getKey())) {
                     foundMachineType = true;
-                    stuffPerSecond = machineID.getValue();
+                    processingSpeed = machineID.getValue();
                     for (Map.Entry<String, Integer> machineTier : MekanismBlocks.MEKANISM_MACHINE_TIERS.entrySet()) {
                         String key = machineTier.getKey();
-//                        Msg(key, player);
+
                         if (id.replace("mekanism:", "").startsWith(key)) {
-//                            Msg(String.valueOf(stuffPerSecond), player);
-                            stuffPerSecond *= machineTier.getValue();
-//                            Msg(String.valueOf(stuffPerSecond), player);
+                            processingSpeed *= machineTier.getValue(); // multiply the speed of the machine by it's tier
                             break;
                         }
                     }
@@ -86,22 +96,18 @@ public class StopwatchItem extends Item {
                 for (Map.Entry<String, Double> entry : MekanismBlocks.MEKANISM_MILLIBUCKET_MACHINES.entrySet()) {
                     if (id.endsWith(entry.getKey())) {
                         foundMachineType = true;
-                        stuffPerSecond = entry.getValue();
+                        processingSpeed = entry.getValue();
                         break;
                     }
                 }
             }
 
             NbtCompound upgradeTag = contents.getCompound("componentUpgrade").getCompound("upgrades");
-//            Msg(String.valueOf(upgradeTag), player);
-//
-//            Msg(String.valueOf(contents.getCompound("componentUpgrade").get("upgrades")), player);
-//            Msg(String.valueOf(upgradeTag), player);
-//            Msg(String.valueOf(contents.getCompound("componentUpgrade")), player);
-            hasUpgrades = !upgradeTag.toString().equals("");
-//            Msg(String.valueOf(hasUpgrades), player);
 
-            /* 0: speed
+            hasUpgrades = !upgradeTag.toString().equals("");
+
+            /* mekanism upgrades
+             *  0: speed
              *  1: energy
              *  2: filter
              *  3: gas
@@ -111,24 +117,28 @@ public class StopwatchItem extends Item {
              * */
 
             if (hasUpgrades) {
-                NbtList upgradesListTag = contents.getCompound("componentUpgrade").getList("upgrades", 10); // 10 indicates a list of CompoundTag elements
+                NbtList upgradesListTag = contents.getCompound("componentUpgrade").getList("upgrades", COMPOUND_LIST_KEY);
                 for (int i = 0; i < upgradesListTag.size(); i++) {
                     NbtCompound upgradeTypeAmountTag = upgradesListTag.getCompound(i);
-                    int type = upgradeTypeAmountTag.getInt("type");
-                    int amount = upgradeTypeAmountTag.getInt("amount");
-//                    Msg(String.valueOf(type), player);
-//                    Msg(String.valueOf(amount), player);
-                    if (type == 0) {
+                    int upgradeType = upgradeTypeAmountTag.getInt("type");
+                    int upgradeAmount = upgradeTypeAmountTag.getInt("amount");
+
+                    if (ConfigOption.debugMode.getValue()) {
+                        System.out.println("value of type: " + String.valueOf(foundMachineType));
+                        System.out.println("value of amount: " + String.valueOf(upgradeAmount));
+                    }
+
+                    if (upgradeType == 0) { // speed upgrade
                         boolean isStrong = false;
                         for (String machineID: MekanismBlocks.STRONG_UPGRADE_MACHINES) {
                             if (id.endsWith(machineID)) {
-                                stuffPerSecond *= MekanismBlocks.FAST_SPEED_UPGRADES[amount];
-                                isStrong = true;
+                                processingSpeed *= MekanismBlocks.FAST_SPEED_UPGRADES[upgradeAmount];
+                                isStrong = true; // strong_upgrade_machines gain a higher speed multiplier from speed upgrades than normal
                                 break;
                             }
                         }
                         if (!isStrong) {
-                            stuffPerSecond *= MekanismBlocks.SLOW_SPEED_UPGRADES[amount];
+                            processingSpeed *= MekanismBlocks.SLOW_SPEED_UPGRADES[upgradeAmount];
                         }
                     }
                 }
@@ -148,32 +158,26 @@ public class StopwatchItem extends Item {
                     sendFail(context, false);
                     return ActionResult.PASS;
                 }
-                stuffPerSecond = 1.0 / (cookTimeSeconds);
+                processingSpeed = 1.0 / (cookTimeSeconds); // speed is the inverse of the total cook time of one item
             } else {
                 for (Map.Entry<String, Double> machineSet : AdAstraBlocks.AD_ASTRA_MACHINES.entrySet()) {
                     if (name.equals(machineSet.getKey())) {
-                        stuffPerSecond = machineSet.getValue();
+                        processingSpeed = machineSet.getValue();
                         break;
                     }
                 }
-//                stuffPerSecond = switch (name) {
-//                    case "oxygen_loader" -> 400;
-//                    default -> 0;
-//                };
             }
             if (ConfigOption.debugMode.getValue()) {
-                System.out.println("Stuff Per Second: " + stuffPerSecond);
+                System.out.println("Processing Speed: " + processingSpeed);
             }
         }
 
-        if (stuffPerSecond == 0) { // block entity was not detected
+        if (processingSpeed == 0) { // block entity was not detected
             sendFail(context, true);
             return ActionResult.PASS;
         }
 
-        sendSuccess(stuffPerSecond, context);
-
-
+        sendSuccess(processingSpeed, context);
         return ActionResult.SUCCESS;
     }
 

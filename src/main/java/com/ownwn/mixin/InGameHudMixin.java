@@ -12,6 +12,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class InGameHudMixin {
 	@Inject(at = @At("HEAD"), method = "renderHotbar")
 	private void renderHotbar(float tickDelta, MatrixStack matrices, CallbackInfo info) {
+		/* use a Mixin to inject in to the hotbar renderer, so that any text we want to draw can be drawn at the same time.
+		This is good because when rendering the hotbar, the game will already have done the usual null checks, e.g. checking the player isn't null*/
 		DrawHelper.doDraw(matrices);
 	}
 }
