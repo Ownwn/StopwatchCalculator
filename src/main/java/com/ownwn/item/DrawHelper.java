@@ -35,7 +35,8 @@ public class DrawHelper {
     }
 
     public static void drawSuccess(double machineSpeed) {
-        message = ConfigOption.shortMessages.getValue() ? "\u00a76Speed: \u00a7b" + new DecimalFormat("#.###").format(machineSpeed) + "\u00a76/s" : "\u00a76This block processes at \u00a7b" + new DecimalFormat("#.###").format(machineSpeed) + " \u00a76things/s";
+        String processType = message.isEmpty() ? "items" : "millibuckets";
+        message = ConfigOption.shortMessages.getValue() ? "\u00a76Speed: \u00a7b" + new DecimalFormat("#.###").format(machineSpeed) + "\u00a76/s" : "\u00a76This block processes at \u00a7b" + new DecimalFormat("#.###").format(machineSpeed) + " \u00a76" + processType + "/s";
         drawTime = System.currentTimeMillis() + 2000;
         //u00a7 followed by a character is used to colour text.
     }
